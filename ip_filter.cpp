@@ -3,6 +3,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
+
+using IpPool    = std::vector<std::vector<std::string>>;
+using IpAddress = std::vector<std::string>;
 
 // ("",  '.') -> [""]
 // ("11", '.') -> ["11"]
@@ -10,48 +14,64 @@
 // ("11.", '.') -> ["11", ""]
 // (".11", '.') -> ["", "11"]
 // ("11.22", '.') -> ["11", "22"]
-std::vector<std::string> split(const std::string &str, char d)
+IpAddress split(const std::string &str, char splitter)
 {
-    std::vector<std::string> r;
+    IpAddress ip_address;
 
     std::string::size_type start = 0;
-    std::string::size_type stop = str.find_first_of(d);
+    std::string::size_type stop = str.find_first_of(splitter);
     while(stop != std::string::npos)
     {
-        r.push_back(str.substr(start, stop - start));
+        ip_address.push_back(str.substr(start, stop - start));
 
         start = stop + 1;
-        stop = str.find_first_of(d, start);
+        stop = str.find_first_of(splitter, start);
     }
 
-    r.push_back(str.substr(start));
+    ip_address.push_back(str.substr(start));
 
-    return r;
+    return ip_address;
 }
+
+ bool IpAddressPartsComparator(const std::string& left_part, const std::string& right_part)
+ {
+     if(left_part.size() < right_part.size())
+     {
+         return true;
+     }
+     else if(left_part.size() > right_part.size()){
+         return false;
+     }
+
+     return left_part < right_part;
+ }
+
+ bool IpAdresseesComparator(const IpAddress& left_address, const IpAddress& right_address)
+ {
+     return std::lexicographical_compare(left_address.begin(), left_address.end(), right_address.begin(), right_address.end(), IpAddressPartsComparator);
+ }
 
 int main(int argc, char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string>> ip_pool;
+        IpPool ip_pool;
 
-        for(std::string line; std::getline(std::cin, line);)
+        for(std::string line; std::getline(std::cin, line) && line.size() > 0;)
         {
-            std:: cout << line.size() << std::endl;
-            std::vector<std::string> v = split(line, '\t');
-            ip_pool.push_back(split(v.at(0), '.'));
+            IpAddress ip_address = split(line, '\t');
+            ip_pool.push_back(split(ip_address.at(0), '.'));
         }
 
-        // TODO reverse lexicographically sort
+        std::sort(ip_pool.begin(), ip_pool.end(), IpAdresseesComparator);
 
-        for(std::vector<std::vector<std::string> >::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
+        for(IpPool::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
         {
-            for(std::vector<std::string>::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
+            for(IpAddress::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
             {
                 if (ip_part != ip->cbegin())
                 {
                     std::cout << ".";
-
                 }
                 std::cout << *ip_part;
             }
