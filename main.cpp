@@ -13,9 +13,9 @@ int main()
   try
   {
 
-    IpPool ip_pool = getInput();
+    IpPool ip_pool = get_input();
 
-    std::sort(ip_pool.begin(), ip_pool.end(), IpAdresseesComparator);
+    std::sort(ip_pool.begin(), ip_pool.end(), ip_adressees_comparator);
 
     for (auto const &ip_address : ip_pool)
     {

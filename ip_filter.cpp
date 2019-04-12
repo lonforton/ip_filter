@@ -33,7 +33,7 @@ IpAddress split(const std::string &str, char splitter)
   return ip_address;
 }
 
-bool IpAddressPartsComparator(const std::string &left_part, const std::string &right_part)
+bool ip_address_parts_comparator(const std::string& left_part, const std::string& right_part)
 {
   if (left_part.size() < right_part.size())
   {
@@ -47,19 +47,19 @@ bool IpAddressPartsComparator(const std::string &left_part, const std::string &r
   return left_part < right_part;
 }
 
-bool IpAdresseesComparator(const IpAddress &left_address, const IpAddress &right_address)
+bool ip_adressees_comparator(const IpAddress& left_address, const IpAddress& right_address)
 {
-  return std::lexicographical_compare(left_address.begin(), left_address.end(), right_address.begin(), right_address.end(), IpAddressPartsComparator);
+  return std::lexicographical_compare(left_address.begin(), left_address.end(), right_address.begin(), right_address.end(), ip_address_parts_comparator);
 }
 
-IpPool getInput(std::istream &is);
+IpPool get_input(std::istream &is);
 
-IpPool getInput()
+IpPool get_input()
 {
-  return getInput(std::cin);
+  return get_input(std::cin);
 }
 
-IpPool getInput(std::istream &is)
+IpPool get_input(std::istream &is)
 {
   IpPool ip_pool;
   for (std::string line; std::getline(is, line) && line.size() > 0;)
