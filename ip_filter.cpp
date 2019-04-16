@@ -5,8 +5,9 @@
 #include <vector>
 #include <algorithm>
 
-using IpPool = std::vector<std::vector<std::string>>;
-using IpAddress = std::vector<std::string>;
+using IpPool = std::vector<std::vector<int>>;
+using IpAddressStr = std::vector<std::string>;
+using IpAddress = std::vector<int>;
 
 // ("",  '.') -> [""]
 // ("11", '.') -> ["11"]
@@ -14,9 +15,9 @@ using IpAddress = std::vector<std::string>;
 // ("11.", '.') -> ["11", ""]
 // (".11", '.') -> ["", "11"]
 // ("11.22", '.') -> ["11", "22"]
-IpAddress split(const std::string &str, char splitter)
+IpAddressStr split(const std::string &str, char splitter)
 {
-  IpAddress ip_address;
+  IpAddressStr ip_address;
 
   std::string::size_type start = 0;
   std::string::size_type stop = str.find_first_of(splitter);
@@ -33,38 +34,17 @@ IpAddress split(const std::string &str, char splitter)
   return ip_address;
 }
 
-bool ip_address_parts_comparator(const std::string& left_part, const std::string& right_part)
-{
-  if (left_part.size() < right_part.size())
-  {
-    return false;
-  }
-  else if (left_part.size() > right_part.size())
-  {
-    return true;
-  }
-
-  return left_part > right_part;
-}
-
-bool ip_adressees_comparator(const IpAddress& left_address, const IpAddress& right_address)
-{
-  return std::lexicographical_compare(left_address.begin(), left_address.end(), right_address.begin(), right_address.end(), ip_address_parts_comparator);
-}
-
 template<typename... Args>
 IpPool filter(const IpPool& ip_pool, Args... args)
 {
-  std::string filter_expression;
-  __attribute__((unused)) int arr[sizeof...(args)]  = {(filter_expression.append(args + "."), 0)...};
-  filter_expression.pop_back();  //remove last dot
+  std::vector<int> filter_expression;
+  __attribute__((unused)) int arr[sizeof...(args)]  = {(filter_expression.push_back(args), 0)...};
 
   IpPool ip_pool_filtered;
-  IpAddress ip_address_to_compare = split(filter_expression, '.');
 
   for (auto const &ip_address : ip_pool)
   {
-    if (std::equal(ip_address_to_compare.begin(), ip_address_to_compare.end(), ip_address.begin()))
+    if (std::equal(filter_expression.begin(), filter_expression.end(), ip_address.begin()))
     {
       ip_pool_filtered.push_back(ip_address);
     }
@@ -73,13 +53,13 @@ IpPool filter(const IpPool& ip_pool, Args... args)
   return ip_pool_filtered;
 }
 
-IpPool filter_any(const IpPool& ip_pool, const std::string& filter_expression)
+IpPool filter_any(const IpPool& ip_pool, int filter_expression)
 {
   IpPool ip_pool_filtered;
   for (auto const &ip_address : ip_pool)
   {
     if (std::find_if(ip_address.begin(), ip_address.end(), 
-    [filter_expression](const std::string &str) { return str == filter_expression; }) != ip_address.end())
+    [filter_expression](int value) { return value == filter_expression; }) != ip_address.end())
     {
       ip_pool_filtered.push_back(ip_address);
     }
@@ -114,8 +94,13 @@ IpPool get_input(std::istream &is)
   IpPool ip_pool;
   for (std::string line; std::getline(is, line) && line.size() > 0;)
   {
-    IpAddress ip_address = split(line, '\t');
-    ip_pool.push_back(split(ip_address.at(0), '.'));
+    IpAddressStr ip_address_str = split(split(line, '\t').at(0), '.');
+    IpAddress ip_address;
+    for(auto const& element : ip_address_str)
+    {
+      ip_address.push_back(std::stoi(element));
+    }
+    ip_pool.push_back(ip_address);
   }
 
   return ip_pool;
