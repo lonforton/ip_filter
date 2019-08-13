@@ -18,7 +18,7 @@ set_target_properties(ip_filter unit_tests PROPERTIES
     COMPILE_OPTIONS "-Wpedantic;-Wall;-Wextra"
 )
 
-set_target_properties(unit_tests PROPERTIES    
+set_target_properties(ip_filter unit_tests PROPERTIES    
     COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK
     INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
 )
